@@ -11,28 +11,27 @@
 
 #include <aruco/aruco.h>
 
-class ArucoDetector
+namespace ros_aruco
 {
-  private:
-    ros::NodeHandle nh_;
-    image_transport::ImageTransport it_;
-    image_transport::Subscriber image_sub_;
-    ros::Publisher pose_pub_;
-    ros::Publisher id_pub_;
-    std::string target_encoding_;
+  class ArucoDetector
+  {
+    private:
+      ros::NodeHandle nh_;
+      image_transport::ImageTransport it_;
+      image_transport::Subscriber image_sub_;
+      ros::Publisher marker_pub_;
+      std::string target_encoding_;
 
-    aruco::MarkerDetector marker_detector_;
-    aruco::CameraParameters camera_parameters_;
-    float marker_size_;
+      aruco::MarkerDetector marker_detector_;
+      aruco::CameraParameters camera_parameters_;
+      float marker_size_;
 
-    ros::Publisher my_pub_;
+    public:
+      ArucoDetector();
+      std::vector<aruco::Marker> detect(const cv::Mat image);
 
-  public:
-    ArucoDetector();
-    std::vector<aruco::Marker> detect(const cv::Mat image);
-
-    void detectorCb(const sensor_msgs::ImageConstPtr& msg);
-    void setMarkerSize(float marker_size);
-};
-
+      void detectorCb(const sensor_msgs::ImageConstPtr& msg);
+      void setMarkerSize(float marker_size);
+  };
+}
 #endif

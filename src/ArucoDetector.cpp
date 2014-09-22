@@ -1,4 +1,5 @@
 #include <ros_aruco/ArucoDetector.h>
+#include <ros_aruco/MarkerArray.h>
 
 #include <string>
 #include <vector>
@@ -9,13 +10,13 @@
 #include <ros/assert.h>
 #include <cv_bridge/cv_bridge.h>
 #include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseArray.h>
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
-#include <std_msgs/Int16.h>
-#include <std_msgs/Int16MultiArray.h>
 
 #include <aruco/aruco.h>
+
+namespace ros_aruco
+{
 
 ArucoDetector::ArucoDetector()
   : nh_("~"), it_(nh_), 
@@ -53,9 +54,7 @@ ArucoDetector::ArucoDetector()
   // Subscribe to input video feed and publish output video feed
   image_sub_ = it_.subscribe(detector_topic, 1,
     &ArucoDetector::detectorCb, this);
-  pose_pub_ = nh_.advertise<geometry_msgs::PoseArray>(publish_topic + "/markers", 1);
-  my_pub_ = nh_.advertise<geometry_msgs::Pose>(publish_topic + "/pose", 1);
-  id_pub_ = nh_.advertise<std_msgs::Int16MultiArray>(publish_topic + "/markers/ids", 1);
+  marker_pub_ = nh_.advertise<ros_aruco::MarkerArray>(publish_topic, 100);
 }
 
 
@@ -86,48 +85,40 @@ void ArucoDetector::detectorCb(const sensor_msgs::ImageConstPtr& msg)
   }
 
   std::vector<aruco::Marker> markers = detect(cv_ptr->image);
+  ros_aruco::MarkerArray marker_msg;
+  marker_msg.header = msg->header;
 
-  geometry_msgs::PoseArray poses;
-  std_msgs::Int16MultiArray ids;
-  poses.header = msg->header;
-
-  for (aruco::Marker marker : markers) {
+  for (aruco::Marker m : markers) {
+    ros_aruco::Marker marker;
     geometry_msgs::Pose pose;
     int16_t id;
     double position[3];
     double orientation[4];
 
-    marker.OgreGetPoseParameters(position, orientation);
+    m.OgreGetPoseParameters(position, orientation);
 
-    pose.position.x = 2;// position[0];
-    pose.position.y = 2;// position[1];
-    pose.position.z = 2;// position[2];
-    pose.orientation.w = orientation[0];
-    pose.orientation.x = orientation[1];
-    pose.orientation.y = orientation[2];
-    pose.orientation.z = orientation[3];
+    marker.pose.position.x = 2;// position[0];
+    marker.pose.position.y = 2;// position[1];
+    marker.pose.position.z = 2;// position[2];
+    marker.pose.orientation.w = orientation[0];
+    marker.pose.orientation.x = orientation[1];
+    marker.pose.orientation.y = orientation[2];
+    marker.pose.orientation.z = orientation[3];
 
-    id = marker.id;
+    marker.id = m.id;
 
-    poses.poses.push_back(pose);
-    ids.data.push_back(id);
-
-    my_pub_.publish(pose);
-    break;
+    marker_msg.push_back(marker);
   }
-
-  id_pub_.publish(ids);
-  if (!poses.poses.empty() && !ids.data.empty())
-  {
-    pose_pub_.publish(poses);
-  }
+  marker_pub_.publish(marker_msg);
 }
+
+} // namespace ros_aruco
 
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "image_converter");
-  ArucoDetector ic;
+  ros::init(argc, argv, "aruco_detector");
+  ros_aruco::ArucoDetector ic;
   ros::spin();
   return EXIT_SUCCESS;
 }
