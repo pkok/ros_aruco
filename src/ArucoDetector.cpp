@@ -47,7 +47,7 @@ namespace ros_aruco
 ArucoDetector::ArucoDetector()
   : nh_("~"), it_(nh_), 
   MARKER_NS("aruco"), 
-  MARKER_VISUALIZATION_TYPE(visualization_msgs::Marker::ARROW)
+  MARKER_VISUALIZATION_TYPE(visualization_msgs::Marker::CUBE)
 {
   std::string detector_topic, publish_topic;
   std::string image_color, camera_info, marker_size, output;
@@ -149,7 +149,7 @@ void ArucoDetector::detectorCb(const sensor_msgs::ImageConstPtr& msg)
 
     marker.header = header;
     marker.ns = MARKER_NS;
-    marker.type = visualization_msgs::Marker::CUBE;//MARKER_VISUALIZATION_TYPE;
+    marker.type = MARKER_VISUALIZATION_TYPE;
     marker.color = MARKER_COLOR;
     marker.id = m.id;
     marker.lifetime = ros::Duration(0.1);
