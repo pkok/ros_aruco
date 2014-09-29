@@ -8,6 +8,10 @@
 
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/Image.h>
+#include <std_msgs/ColorRGBA.h>
+#include <visualization_msgs/Marker.h>
 
 #include <aruco/aruco.h>
 
@@ -16,22 +20,30 @@ namespace ros_aruco
   class ArucoDetector
   {
     private:
+      std::string MARKER_NS;
+      int32_t MARKER_VISUALIZATION_TYPE;
+      std_msgs::ColorRGBA MARKER_COLOR;
+
       ros::NodeHandle nh_;
       image_transport::ImageTransport it_;
       image_transport::Subscriber image_sub_;
+      ros::Subscriber camera_info_sub_;
       ros::Publisher marker_pub_;
       std::string target_encoding_;
 
       aruco::MarkerDetector marker_detector_;
       aruco::CameraParameters camera_parameters_;
+      bool camera_parameters_set_;
       float marker_size_;
 
     public:
       ArucoDetector();
       std::vector<aruco::Marker> detect(const cv::Mat image);
+      bool setCameraParameters(const cv::Mat& cameraMatrix, 
+          const cv::Mat& distortionCoefficients, const cv::Size& size);
 
       void detectorCb(const sensor_msgs::ImageConstPtr& msg);
-      void setMarkerSize(float marker_size);
+      void cameraInfoCb(const sensor_msgs::CameraInfoConstPtr& msg);
   };
 }
 #endif

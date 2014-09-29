@@ -8,10 +8,11 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   geometry_msgs
   image_transport
-  message_generation
+  #message_generation
   roscpp
   sensor_msgs
-  std_msgs
+  #std_msgs
+  visualization_msgs
 )
 
 add_definitions(-std=c++11)
@@ -53,12 +54,11 @@ find_package(OpenCV REQUIRED)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  Markers.msg
-#   Message1.msg
-#   Message2.msg
-)
+# add_message_files(
+#   FILES
+#   Marker.msg
+#   MarkerArray.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -75,10 +75,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  geometry_msgs std_msgs #   sensor_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   geometry_msgs std_msgs #   sensor_msgs
+# )
 
 ###################################
 ## catkin specific configuration ##
@@ -92,7 +92,7 @@ generate_messages(
 catkin_package(
  INCLUDE_DIRS include
 #  LIBRARIES test
- CATKIN_DEPENDS cv_bridge geometry_msgs image_transport message_generation roscpp sensor_msgs std_msgs
+ CATKIN_DEPENDS cv_bridge geometry_msgs image_transport roscpp sensor_msgs visualization_msgs #message_generation std_msgs
 #  DEPENDS system_lib
 )
 
